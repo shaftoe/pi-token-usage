@@ -1,0 +1,2 @@
+{"type":"session","id":"sess-sub-001","timestamp":"2025-01-15T13:00:00Z","provider":"anthropic"}
+{"type":"message","timestamp":"2025-01-15T13:00:05Z","message":{"role":"assistant","model":"claude-sonnet-4-20250514","provider":"anthropic","usage":{"input":50,"output":25,"totalTokens":75,"cost":{"input":0.00015,"output":0.000075,"total":0.000225}}}}

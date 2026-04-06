@@ -1,0 +1,6 @@
+{"type":"session","id":"sess-002","timestamp":"2025-01-15T11:00:00Z","provider":"openai"}
+{"type":"message","timestamp":"2025-01-15T11:00:01Z","message":{"role":"user","content":[{"type":"text","text":"Hello"}]}}
+{"type":"message","timestamp":"2025-01-15T11:00:05Z","message":{"role":"assistant","model":"gpt-4o","provider":"openai","usage":{"input":100,"output":50,"totalTokens":150,"cost":{"input":0.0003,"output":0.00015,"total":0.00045}}}}
+{"type":"message","timestamp":"2025-01-15T11:00:06Z","message":{"role":"assistant","model":"claude-sonnet-4-20250514","provider":"anthropic","usage":{"input":200,"output":100,"totalTokens":300,"cost":{"input":0.0006,"output":0.0003,"total":0.0009}}}}
+{"type":"message","timestamp":"2025-01-15T11:00:10Z","message":{"role":"user","content":[{"type":"text","text":"Do something"}]}}
+{"type":"message","timestamp":"2025-01-15T11:00:15Z","message":{"role":"assistant","model":"gpt-4o","provider":"openai","usage":{"input":400,"output":250,"totalTokens":650,"cost":{"input":0.0012,"output":0.00075,"total":0.00195}}}}
