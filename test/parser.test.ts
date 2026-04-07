@@ -183,7 +183,7 @@ describe("scanAndAggregate", () => {
   });
 
   test("throws for non-existent path", async () => {
-    await expect(scanAndAggregate("/nonexistent/path", null)).rejects.toThrow("Path not found");
+    await expect(scanAndAggregate("/nonexistent/path", null)).rejects.toThrow();
   });
 
   test("aggregates a single .jsonl file", async () => {

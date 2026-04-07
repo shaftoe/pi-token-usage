@@ -69,11 +69,11 @@
     "prettier": "^3.4.0",
     "semantic-release": "^25.0.3",
     "typescript": "6.0.2",
+    "eslint": "^10.2.0",
+    "jiti": "^2.6.1",
     "typescript-eslint": "^8.58.0"
   },
   "dependencies": {
-    "@js-temporal/polyfill": "^0.5.1",
-    "eslint": "^10.2.0",
-    "jiti": "^2.6.1"
+    "@js-temporal/polyfill": "^0.5.1"
   }
 }

@@ -1,4 +1,5 @@
 import type { ModelStats, ReportMeta, Totals } from "../types.js";
+import { fmtDaysLabel } from "../utils.js";
 
 interface JsonReport {
   meta: {
@@ -16,7 +17,7 @@ export function renderJson(rows: ModelStats[], totals: Totals, meta: ReportMeta)
   const report: JsonReport = {
     meta: {
       target: meta.targetDesc,
-      window: meta.daysArg !== null ? `last ${meta.daysArg} day${meta.daysArg === 1 ? "" : "s"}` : null,
+      window: fmtDaysLabel(meta.daysArg),
       sessionCount: meta.sessionCount,
       fileCount: meta.fileCount,
       errorCount: meta.errorCount,

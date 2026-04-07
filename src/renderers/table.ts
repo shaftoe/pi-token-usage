@@ -1,5 +1,5 @@
 import type { ModelStats, ReportMeta, Totals } from "../types.js";
-import { fmt, fmtUsd } from "../utils.js";
+import { fmt, fmtUsd, fmtDaysSuffix } from "../utils.js";
 
 const COL_MODEL = 28;
 const COL_PROV = 12;
@@ -48,7 +48,7 @@ export function renderTable(rows: ModelStats[], totals: Totals, meta: ReportMeta
 
   const lines: string[] = [];
 
-  const window = meta.daysArg !== null ? ` (last ${meta.daysArg} day${meta.daysArg === 1 ? "" : "s"})` : "";
+  const window = fmtDaysSuffix(meta.daysArg);
   lines.push(`Token Usage Report — ${meta.targetDesc}${window}`);
   lines.push(`Sessions: ${meta.sessionCount}  •  Files: ${meta.fileCount}  •  Parse errors: ${meta.errorCount}`);
   lines.push("");
