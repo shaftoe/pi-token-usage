@@ -73,3 +73,14 @@ bun test:coverage     # Run tests and show coverage stats
 2. Parses each file, extracting `assistant` messages with `usage` data
 3. Aggregates token counts and costs per model+provider
 4. Renders in the requested format
+
+## Releasing
+
+This project uses automated publishing to NPM via GitHub Actions. The workflow will:
+- Run all CI checks
+- Build the package
+- Publish to NPM with provenance (signed) via [trusted publishing](https://docs.npmjs.com/trusted-publishers)
+
+## License
+
+See [LICENSE](./LICENSE)
