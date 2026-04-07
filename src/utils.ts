@@ -27,6 +27,14 @@ export function csvQuote(value: string): string {
   return value;
 }
 
+export function fmtDaysSuffix(daysArg: number | null): string {
+  return daysArg !== null ? ` (last ${daysArg} day${daysArg === 1 ? "" : "s"})` : "";
+}
+
+export function fmtDaysLabel(daysArg: number | null): string | null {
+  return daysArg !== null ? `last ${daysArg} day${daysArg === 1 ? "" : "s"}` : null;
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Argument parsing
 // ──────────────────────────────────────────────────────────────────────────────
@@ -74,6 +82,9 @@ export function parseArgs(rawArgs: string, cwd: string): ParsedArgs {
       daysArg = parseInt(tok, 10);
     } else {
       // Positional: treat as path
+      if (targetPath !== null) {
+        throw new Error(`Unexpected argument: "${tok}". Only one path argument is allowed.`);
+      }
       targetPath = resolve(cwd, tok);
       targetDesc = tok;
     }

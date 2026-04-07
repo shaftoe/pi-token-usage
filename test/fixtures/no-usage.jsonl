@@ -10,12 +10,3 @@
 
 {"type":"other","timestamp":"2025-01-15T14:00:25Z","some":"other data"}
 
-{"type":"message","timestamp":"2025-01-15T14:00:05Z","message":{"role":"assistant","model":"model-without-usage"}}
-
-{"type":"message","timestamp":"2025-01-15T14:00:10Z","message":{"role":"assistant","usage":{"input":100,"output":50,"totalTokens":150,"cost":{"input":0.0003,"output":0.00015,"total":0.00045}}}}
-
-{"type":"message","timestamp":"2025-01-15T14:00:15Z","message":{"role":"assistant","provider":"provider-message-level"}}
-
-{"type":"message","timestamp":"2025-01-15T14:00:20Z","message":{"role":"assistant","model":"model-without-provider","usage":{"input":100,"output":50,"totalTokens":150,"cost":{"input":0.0003,"output":0.00015,"total":0.00045}}}}
-
-{"type":"other","timestamp":"2025-01-15T14:00:25Z","some":"other data"}

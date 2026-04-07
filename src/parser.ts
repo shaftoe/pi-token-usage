@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, statSync } from "node:fs";
 import { stat, readdir } from "node:fs/promises";
 import { join, extname } from "node:path";
 import readline from "node:readline";
@@ -122,10 +122,6 @@ export async function scanAndAggregate(
   targetPath: string,
   sinceMs: number | null,
 ): Promise<{ acc: StatsAccumulator; fileCount: number }> {
-  if (!existsSync(targetPath)) {
-    throw new Error(`Path not found: ${targetPath}`);
-  }
-
   const pathStat = await stat(targetPath);
   let files: string[];
 

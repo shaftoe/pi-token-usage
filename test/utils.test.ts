@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { fmt, fmtUsd, csvQuote, parseArgs, DEFAULT_SESSIONS_DIR } from "../src/utils.js";
+import { fmt, fmtUsd, csvQuote, parseArgs, DEFAULT_SESSIONS_DIR, fmtDaysSuffix, fmtDaysLabel } from "../src/utils.js";
 
 describe("fmt", () => {
   test("formats integers with commas", () => {
@@ -121,5 +121,37 @@ describe("parseArgs", () => {
     expect(result.daysArg).toBe(30);
     expect(result.format).toBe("csv");
     expect(result.savePath).toBe("/cwd/out.csv");
+  });
+
+  test("throws on multiple positional arguments", () => {
+    expect(() => parseArgs("path1 path2", "/cwd")).toThrow('Unexpected argument: "path2"');
+  });
+});
+
+describe("fmtDaysSuffix", () => {
+  test("returns empty string when daysArg is null", () => {
+    expect(fmtDaysSuffix(null)).toBe("");
+  });
+
+  test("returns singular form for 1 day", () => {
+    expect(fmtDaysSuffix(1)).toBe(" (last 1 day)");
+  });
+
+  test("returns plural form for multiple days", () => {
+    expect(fmtDaysSuffix(7)).toBe(" (last 7 days)");
+  });
+});
+
+describe("fmtDaysLabel", () => {
+  test("returns null when daysArg is null", () => {
+    expect(fmtDaysLabel(null)).toBeNull();
+  });
+
+  test("returns singular form for 1 day", () => {
+    expect(fmtDaysLabel(1)).toBe("last 1 day");
+  });
+
+  test("returns plural form for multiple days", () => {
+    expect(fmtDaysLabel(30)).toBe("last 30 days");
   });
 });
