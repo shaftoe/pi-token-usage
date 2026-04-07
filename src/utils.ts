@@ -28,6 +28,28 @@ export function csvQuote(value: string): string {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Days-window formatting (shared across renderers)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Format a "last N days" suffix for use in report headers.
+ * Returns `" (last N day(s))"` or empty string when no filter.
+ */
+export function formatDaysSuffix(daysArg: number | null): string {
+  if (daysArg === null) return "";
+  return ` (last ${daysArg} day${daysArg === 1 ? "" : "s"})`;
+}
+
+/**
+ * Format a "last N days" label (no parentheses) for structured output.
+ * Returns `"last N day(s)"` or `null` when no filter.
+ */
+export function formatDaysLabel(daysArg: number | null): string | null {
+  if (daysArg === null) return null;
+  return `last ${daysArg} day${daysArg === 1 ? "" : "s"}`;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Argument parsing
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -74,6 +96,7 @@ export function parseArgs(rawArgs: string, cwd: string): ParsedArgs {
       daysArg = parseInt(tok, 10);
     } else {
       // Positional: treat as path
+      if (targetPath !== null) throw new Error(`Unexpected argument: "${tok}". Only one path argument is allowed.`);
       targetPath = resolve(cwd, tok);
       targetDesc = tok;
     }

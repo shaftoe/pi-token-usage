@@ -1,5 +1,5 @@
 import type { ModelStats, ReportMeta, Totals } from "../types.js";
-import { fmt, fmtUsd } from "../utils.js";
+import { fmt, fmtUsd, formatDaysSuffix } from "../utils.js";
 
 function mdCell(s: string): string {
   return ` ${s} |`;
@@ -34,7 +34,7 @@ function statsToMdRow(
 export function renderMarkdown(rows: ModelStats[], totals: Totals, meta: ReportMeta): string {
   const lines: string[] = [];
 
-  const window = meta.daysArg !== null ? ` (last ${meta.daysArg} day${meta.daysArg === 1 ? "" : "s"})` : "";
+  const window = formatDaysSuffix(meta.daysArg);
   lines.push(`## Token Usage Report — ${meta.targetDesc}${window}`);
   lines.push("");
   lines.push(
