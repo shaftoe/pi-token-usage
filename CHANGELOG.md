@@ -1,3 +1,10 @@
+## [0.1.1](https://github.com/shaftoe/pi-token-usage/compare/v0.1.0...v0.1.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* code quality cleanups and improvements ([#2](https://github.com/shaftoe/pi-token-usage/issues/2)) ([fede8a0](https://github.com/shaftoe/pi-token-usage/commit/fede8a0b2bff6ae5c02fc51b9cd709ce33b691df)), closes [#1](https://github.com/shaftoe/pi-token-usage/issues/1)
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

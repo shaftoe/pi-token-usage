@@ -1,7 +1,7 @@
 {
   "name": "@alexanderfortin/pi-token-usage",
   "author": "Alexander Fortin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pi coding agent extension for analyzing token usage and cost across session files",
   "keywords": [
     "pi-package",
