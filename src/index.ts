@@ -22,6 +22,7 @@ import { writeFile } from "node:fs/promises";
 import { parseArgs } from "./utils.js";
 import { generateReport, NoFilesError, PathNotFoundError } from "./report.js";
 import { showTuiOverlay } from "./ui.js";
+import { parsePruneArgs, pruneSessions, formatPruneReport } from "./prune.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Step 1: Parse and validate arguments
@@ -64,6 +65,34 @@ async function saveToFile(report: string, savePath: string, ctx: ExtensionComman
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Prune command handler
+// ──────────────────────────────────────────────────────────────────────────────
+
+async function handlePrune(args: string, ctx: ExtensionCommandContext): Promise<void> {
+  const options = parsePruneArgs(args, ctx.cwd);
+  if (!options) {
+    ctx.ui.notify("Invalid arguments. Usage: /token-prune <days> [--dry-run] [--path <dir>]", "error");
+    return;
+  }
+
+  const action = options.dryRun ? "Scanning (dry run)" : "Pruning";
+  ctx.ui.notify(`${action} sessions older than ${options.days} days…`, "info");
+
+  const result = await pruneSessions(options);
+  const report = formatPruneReport(result, options);
+
+  if (ctx.hasUI) {
+    await showTuiOverlay(report, ctx);
+  } else {
+    console.log(report);
+  }
+
+  const totalDeleted = result.deletedFiles.length + result.deletedEmptyFiles.length;
+  const prefix = options.dryRun ? "Would delete" : "Deleted";
+  ctx.ui.notify(`${prefix} ${totalDeleted} file(s).`, "info");
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Extension entry point
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -88,6 +117,14 @@ export default function (pi: ExtensionAPI) {
       } else {
         console.log(result.report);
       }
+    },
+  });
+
+  pi.registerCommand("token-prune", {
+    description: "Delete old sessions. Args: <days> [--dry-run] [--path dir]",
+
+    handler: async (args, ctx) => {
+      await handlePrune(args, ctx);
     },
   });
 }
