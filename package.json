@@ -56,6 +56,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "devDependencies": {
+    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.2.0",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
@@ -65,12 +66,12 @@
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "25.5.2",
     "bun-types": "^1.2.0",
+    "eslint": "^10.2.0",
     "globals": "^17.4.0",
+    "jiti": "^2.6.1",
     "prettier": "^3.4.0",
     "semantic-release": "^25.0.3",
     "typescript": "6.0.2",
-    "eslint": "^10.2.0",
-    "jiti": "^2.6.1",
     "typescript-eslint": "^8.58.0"
   },
   "dependencies": {
