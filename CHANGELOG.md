@@ -1,3 +1,10 @@
+## [0.1.2](https://github.com/shaftoe/pi-token-usage/compare/v0.1.1...v0.1.2) (2026-04-14)
+
+
+### Bug Fixes
+
+* bump release ([c206a68](https://github.com/shaftoe/pi-token-usage/commit/c206a68766ab57b63903b2f600b0867237514dbd))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
