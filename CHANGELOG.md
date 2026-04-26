@@ -1,3 +1,10 @@
+## [0.1.3](https://github.com/shaftoe/pi-token-usage/compare/v0.1.2...v0.1.3) (2026-04-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependencies to latest stable versions ([#15](https://github.com/shaftoe/pi-token-usage/issues/15)) ([1493dfa](https://github.com/shaftoe/pi-token-usage/commit/1493dfaa00fdab45db561c9dabbd78267deda6dd))
+
 ## [0.1.2](https://github.com/shaftoe/pi-token-usage/compare/v0.1.1...v0.1.2) (2026-04-14)
 
 
