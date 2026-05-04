@@ -56,7 +56,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "devDependencies": {
-    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.2.0",
+    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.2.1",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
