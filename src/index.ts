@@ -16,7 +16,7 @@
  *   /token-report --format md         — Markdown to stdout
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import type { ParsedArgs } from "./types.js";
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "./utils.js";

@@ -1,6 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { styleLine, createTuiComponent, showTuiOverlay } from "../src/ui.js";
-import type { ExtensionCommandContext, Theme } from "@mariozechner/pi-coding-agent";
+import type { ExtensionCommandContext, Theme } from "@earendil-works/pi-coding-agent";
 
 describe("styleLine", () => {
   const theme: Theme = {

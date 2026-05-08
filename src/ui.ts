@@ -1,6 +1,6 @@
-import type { ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
-import { Text, Container } from "@mariozechner/pi-tui";
-import type { Theme } from "@mariozechner/pi-coding-agent";
+import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import { Text, Container } from "@earendil-works/pi-tui";
+import type { Theme } from "@earendil-works/pi-coding-agent";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Line styling for TUI overlay
