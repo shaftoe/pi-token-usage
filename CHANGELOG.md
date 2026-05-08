@@ -1,3 +1,10 @@
+## [0.1.4](https://github.com/shaftoe/pi-token-usage/compare/v0.1.3...v0.1.4) (2026-05-08)
+
+
+### Bug Fixes
+
+* **deps:** udpate namespace to [@earendil-works](https://github.com/earendil-works) ([a842151](https://github.com/shaftoe/pi-token-usage/commit/a842151012efe473027a1aeb12b9092d492ff8d2))
+
 ## [0.1.3](https://github.com/shaftoe/pi-token-usage/compare/v0.1.2...v0.1.3) (2026-04-26)
 
 
