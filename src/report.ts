@@ -1,11 +1,15 @@
 import type { OutputFormat, ParsedArgs, ReportMeta } from "./types.js";
+import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { existsSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { Temporal } from "@js-temporal/polyfill";
+import { parseArgs } from "./utils.js";
 import { scanAndAggregate } from "./parser.js";
 import { renderTable } from "./renderers/table.js";
 import { renderCsv } from "./renderers/csv.js";
 import { renderJson } from "./renderers/json.js";
 import { renderMarkdown } from "./renderers/markdown.js";
+import { showTuiOverlay } from "./ui.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Formatter registry
@@ -100,4 +104,55 @@ export async function generateReport(parsed: ParsedArgs): Promise<ReportData> {
   const report = render(rows, totals, meta);
 
   return { report, meta };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Report command handler
+// ──────────────────────────────────────────────────────────────────────────────
+
+function parseArguments(args: string, ctx: ExtensionCommandContext): ParsedArgs | null {
+  try {
+    return parseArgs(args, ctx.cwd);
+  } catch (err) {
+    ctx.ui.notify(String((err as Error).message), "error");
+    return null;
+  }
+}
+
+async function tryGenerateReport(parsed: ParsedArgs, ctx: ExtensionCommandContext): Promise<{ report: string } | null> {
+  ctx.ui.notify("Scanning session files…", "info");
+
+  try {
+    return await generateReport(parsed);
+  } catch (err) {
+    if (err instanceof PathNotFoundError || err instanceof NoFilesError) {
+      ctx.ui.notify(err.message, err instanceof NoFilesError ? "warning" : "error");
+      return null;
+    }
+    throw err;
+  }
+}
+
+async function saveToFile(report: string, savePath: string, ctx: ExtensionCommandContext): Promise<void> {
+  await writeFile(savePath, report, "utf-8");
+  ctx.ui.notify(`Report saved to ${savePath}`, "info");
+}
+
+export async function handleReport(args: string, ctx: ExtensionCommandContext): Promise<void> {
+  const parsed = parseArguments(args, ctx);
+  if (!parsed) return;
+
+  const result = await tryGenerateReport(parsed, ctx);
+  if (!result) return;
+
+  if (parsed.savePath) {
+    await saveToFile(result.report, parsed.savePath, ctx);
+    return;
+  }
+
+  if (parsed.format === "table" && ctx.hasUI) {
+    await showTuiOverlay(result.report, ctx);
+  } else {
+    console.log(result.report);
+  }
 }

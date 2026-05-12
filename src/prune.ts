@@ -16,8 +16,10 @@
 import { stat, unlink } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Temporal } from "@js-temporal/polyfill";
+import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { DEFAULT_SESSIONS_DIR } from "./utils.js";
 import { collectJsonlFiles } from "./parser.js";
+import { showTuiOverlay } from "./ui.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types
@@ -242,4 +244,31 @@ export function formatPruneReport(result: PruneResult, options: PruneOptions): s
   }
 
   return lines.join("\n");
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Prune command handler
+// ──────────────────────────────────────────────────────────────────────────────
+
+export async function handlePrune(args: string, ctx: ExtensionCommandContext): Promise<void> {
+  try {
+    const options = parsePruneArgs(args, ctx.cwd);
+    const action = options.dryRun ? "Scanning (dry run)" : "Pruning";
+    ctx.ui.notify(`${action} sessions older than ${options.days} days…`, "info");
+
+    const result = await pruneSessions(options);
+    const report = formatPruneReport(result, options);
+
+    if (ctx.hasUI) {
+      await showTuiOverlay(report, ctx);
+    } else {
+      console.log(report);
+    }
+
+    const totalDeleted = result.deletedFiles.length + result.deletedEmptyFiles.length;
+    const prefix = options.dryRun ? "Would delete" : "Deleted";
+    ctx.ui.notify(`${prefix} ${totalDeleted} file(s).`, "info");
+  } catch (err) {
+    ctx.ui.notify(`Prune failed: ${(err as Error).message}`, "error");
+  }
 }

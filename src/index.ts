@@ -23,37 +23,9 @@
  *   /token-prune 60 --path /custom/dir — prune a specific directory
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
-import { handleReport } from "./report-command.js";
-import { parsePruneArgs, pruneSessions, formatPruneReport } from "./prune.js";
-import { showTuiOverlay } from "./ui.js";
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Prune command handler
-// ──────────────────────────────────────────────────────────────────────────────
-
-async function handlePrune(args: string, ctx: ExtensionCommandContext): Promise<void> {
-  try {
-    const options = parsePruneArgs(args, ctx.cwd);
-    const action = options.dryRun ? "Scanning (dry run)" : "Pruning";
-    ctx.ui.notify(`${action} sessions older than ${options.days} days…`, "info");
-
-    const result = await pruneSessions(options);
-    const report = formatPruneReport(result, options);
-
-    if (ctx.hasUI) {
-      await showTuiOverlay(report, ctx);
-    } else {
-      console.log(report);
-    }
-
-    const totalDeleted = result.deletedFiles.length + result.deletedEmptyFiles.length;
-    const prefix = options.dryRun ? "Would delete" : "Deleted";
-    ctx.ui.notify(`${prefix} ${totalDeleted} file(s).`, "info");
-  } catch (err) {
-    ctx.ui.notify(`Prune failed: ${(err as Error).message}`, "error");
-  }
-}
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { handleReport } from "./report.js";
+import { handlePrune } from "./prune.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Extension entry point
@@ -62,17 +34,11 @@ async function handlePrune(args: string, ctx: ExtensionCommandContext): Promise<
 export default function (pi: ExtensionAPI) {
   pi.registerCommand("token-report", {
     description: "Token usage per model. Args: [days|path] [--format table|csv|json|md] [--save file]",
-
-    handler: async (args, ctx) => {
-      await handleReport(args, ctx);
-    },
+    handler: handleReport,
   });
 
   pi.registerCommand("token-prune", {
     description: "Delete old sessions. Args: <days> [--dry-run] [--force] [--path dir]",
-
-    handler: async (args, ctx) => {
-      await handlePrune(args, ctx);
-    },
+    handler: handlePrune,
   });
 }
