@@ -1,3 +1,10 @@
+## [0.1.5](https://github.com/shaftoe/pi-token-usage/compare/v0.1.4...v0.1.5) (2026-05-12)
+
+
+### Bug Fixes
+
+* **deps:** bump dependencies ([dae90ce](https://github.com/shaftoe/pi-token-usage/commit/dae90ce9dee029c7af7ee9378e8285c13f108e3f))
+
 ## [0.1.4](https://github.com/shaftoe/pi-token-usage/compare/v0.1.3...v0.1.4) (2026-05-08)
 
 
