@@ -1,6 +1,9 @@
 # pi-token-usage
 
-A [Pi coding agent](https://pi.dev) extension that analyzes token usage and cost across your session files.
+A [Pi coding agent](https://pi.dev) extension that
+
+- analyzes token usage and cost across your session files
+- prunes old sessions files on demand
 
 ## Installation
 
@@ -17,6 +20,8 @@ pi -e ./pi-token-usage/src/index.ts
 
 ## Usage
 
+### Report Command
+
 ```
 /token-report                                  Report all sessions (table in TUI)
 /token-report 7                                Last 7 days
@@ -29,7 +34,16 @@ pi -e ./pi-token-usage/src/index.ts
 /token-report --format=csv --save=out.csv      Equals-sign syntax also works
 ```
 
-### Arguments
+### Prune Command
+
+```
+/token-prune 30                    Delete sessions older than 30 days
+/token-prune 30 --dry-run          Show what would be deleted without actually deleting
+/token-prune 60 --path /custom/dir Prune a specific directory
+/token-prune 100 --force           Skip confirmation prompt for large deletions
+```
+
+### Report Arguments
 
 | Argument | Description |
 |----------|-------------|
@@ -37,6 +51,27 @@ pi -e ./pi-token-usage/src/index.ts
 | `[path]` | Path to a `.jsonl` file or directory (default: `~/.pi/agent/sessions`) |
 | `--format, -f` | Output format: `table` (default), `csv`, `json`, `markdown` (alias: `md`) |
 | `--save, -s` | Write output to file instead of stdout/TUI |
+
+### Prune Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `<days>` | Number (required) — delete sessions older than N days |
+| `--dry-run, -d` | Preview what would be deleted without actually deleting |
+| `--force, -f` | Skip confirmation prompt when deleting many files |
+| `--path, -p` | Path to a directory (default: `~/.pi/agent/sessions`) |
+
+### Prune Behavior
+
+The prune command performs two operations:
+
+1. **Old session deletion**: Removes `.jsonl` session files whose modification time is older than the specified number of days
+2. **Empty file cleanup**: Removes any `.jsonl` files that are empty (0 bytes), regardless of age
+
+**Safety features**:
+- Dry-run mode lets you preview what will be deleted
+- If more than 100 files would be deleted, you must use `--force` to confirm (unless in dry-run mode)
+- Only `.jsonl` files are affected; other files are ignored
 
 ### Output Formats
 
@@ -69,10 +104,19 @@ bun test:coverage     # Run tests and show coverage stats
 
 ## How It Works
 
+### Report Generation
+
 1. Scans `~/.pi/agent/sessions` (or given path) for `.jsonl` session files
 2. Parses each file, extracting `assistant` messages with `usage` data
 3. Aggregates token counts and costs per model+provider
 4. Renders in the requested format
+
+### Session Pruning
+
+1. Scans the target directory (recursively) for `.jsonl` session files
+2. Checks each file's modification time and size
+3. Deletes files older than the specified days (or empty files)
+4. Reports total files deleted, space freed, and any errors encountered
 
 ## Releasing
 
