@@ -1,21 +1,23 @@
 /**
  * Token Prune Command
  *
- * /token-prune [days] [--dry-run] [--path path]
+ * /token-prune <days> [--dry-run] [--force] [--path <dir>]
  *
- * Deletes session files older than a specified number of days.
- * Also removes empty .jsonl files.
+ * Deletes .jsonl session files older than <days> days (based on modification time).
+ * Also removes empty .jsonl files (0 bytes) regardless of age.
  *
  * Examples:
- *   /token-prune 30                    — delete sessions older than 30 days
- *   /token-prune 30 --dry-run          — show what would be deleted
- *   /token-prune 30 --path /custom/dir — prune a specific directory
+ *   /token-prune 30              — delete sessions older than 30 days
+ *   /token-prune 30 --dry-run    — preview what would be deleted
+ *   /token-prune 60 --force      — skip confirmation prompt
+ *   /token-prune 60 --path /custom/dir — prune a specific directory
  */
 
-import { stat, unlink, readdir } from "node:fs/promises";
-import { join, extname, resolve } from "node:path";
+import { stat, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
 import { Temporal } from "@js-temporal/polyfill";
 import { DEFAULT_SESSIONS_DIR } from "./utils.js";
+import { collectJsonlFiles } from "./parser.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Types
@@ -25,12 +27,15 @@ export interface PruneOptions {
   days: number;
   targetPath: string;
   dryRun: boolean;
+  force: boolean;
 }
 
 export interface PruneResult {
   deletedFiles: string[];
   deletedEmptyFiles: string[];
   errors: string[];
+  scannedFiles: number;
+  bytesFreed: number;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -62,40 +67,15 @@ async function isFileOld(filePath: string, cutoffMs: number): Promise<boolean> {
 }
 
 /**
- * Collect all .jsonl files in a directory (recursively)
- */
-async function collectJsonlFiles(dirPath: string): Promise<string[]> {
-  const files: string[] = [];
-  let entries;
-
-  try {
-    entries = await readdir(dirPath, { withFileTypes: true });
-  } catch {
-    return files;
-  }
-
-  for (const e of entries) {
-    const full = join(dirPath, e.name);
-    if (e.isDirectory()) {
-      const sub = await collectJsonlFiles(full);
-      files.push(...sub);
-    } else if (e.isFile() && extname(e.name) === ".jsonl") {
-      files.push(full);
-    }
-  }
-
-  return files;
-}
-
-/**
  * Parse prune arguments
  */
-export function parsePruneArgs(rawArgs: string, cwd: string): PruneOptions | null {
+export function parsePruneArgs(rawArgs: string, cwd: string): PruneOptions {
   const tokens = rawArgs.trim().split(/\s+/).filter(Boolean);
 
   let days: number | null = null;
   let targetPath: string | null = null;
   let dryRun = false;
+  let force = false;
 
   let i = 0;
   while (i < tokens.length) {
@@ -103,21 +83,26 @@ export function parsePruneArgs(rawArgs: string, cwd: string): PruneOptions | nul
 
     if (tok === "--dry-run" || tok === "-d") {
       dryRun = true;
+    } else if (tok === "--force" || tok === "-f") {
+      force = true;
     } else if (tok === "--path" || tok === "-p") {
       const next = tokens[++i];
       if (!next) {
-        return null;
+        throw new Error("--path requires a value");
       }
       targetPath = resolve(cwd, next);
-    } else if (/^\d+$/.test(tok)) {
-      days = parseInt(tok, 10);
+    } else if (/^-?\d+$/.test(tok)) {
+      const num = parseInt(tok, 10);
+      if (num <= 0) {
+        throw new Error("days must be a positive integer");
+      }
+      days = num;
     } else if (tok.startsWith("--")) {
-      // Reject unknown flags
-      return null;
+      throw new Error(`Unknown flag: ${tok}`);
     } else {
       // Positional: treat as path
       if (targetPath !== null) {
-        return null;
+        throw new Error("Multiple path arguments provided");
       }
       targetPath = resolve(cwd, tok);
     }
@@ -126,14 +111,18 @@ export function parsePruneArgs(rawArgs: string, cwd: string): PruneOptions | nul
   }
 
   if (days === null) {
-    return null;
+    throw new Error("Missing required argument: days");
+  }
+
+  if (days <= 0) {
+    throw new Error("days must be a positive integer");
   }
 
   if (!targetPath) {
     targetPath = DEFAULT_SESSIONS_DIR();
   }
 
-  return { days, targetPath, dryRun };
+  return { days, targetPath, dryRun, force };
 }
 
 /**
@@ -144,10 +133,41 @@ export async function pruneSessions(options: PruneOptions): Promise<PruneResult>
     deletedFiles: [],
     deletedEmptyFiles: [],
     errors: [],
+    scannedFiles: 0,
+    bytesFreed: 0,
   };
 
   const cutoffMs = Temporal.Now.zonedDateTimeISO().subtract({ days: options.days }).toInstant().epochMilliseconds;
   const files = await collectJsonlFiles(options.targetPath);
+  result.scannedFiles = files.length;
+
+  // Safety check: abort if too many files would be deleted without --force
+  const filesToDelete = [];
+  for (const file of files) {
+    try {
+      const empty = await isEmptyFile(file);
+      const old = !empty ? await isFileOld(file, cutoffMs) : false;
+      if (empty || old) {
+        filesToDelete.push({ file, empty });
+      }
+    } catch {
+      // Will handle in main loop
+    }
+  }
+
+  if (filesToDelete.length > 100 && !options.force && !options.dryRun) {
+    throw new Error(`Would delete ${filesToDelete.length} files. Use --force to confirm.`);
+  }
+
+  // Calculate total bytes that would be freed
+  for (const { file } of filesToDelete) {
+    try {
+      const s = await stat(file);
+      result.bytesFreed += s.size;
+    } catch {
+      // Ignore stat errors for byte count
+    }
+  }
 
   for (const file of files) {
     try {
@@ -187,9 +207,18 @@ export function formatPruneReport(result: PruneResult, options: PruneOptions): s
 
   const lines: string[] = [];
   lines.push(`Session Prune Report (${options.dryRun ? "dry run" : "executed"})`);
-  lines.push("─".repeat(60));
+  lines.push("-".repeat(60));
+  lines.push(`Scanned: ${result.scannedFiles} file(s)`);
   lines.push(`${prefix} ${result.deletedFiles.length} old session file(s)`);
   lines.push(`${prefix} ${result.deletedEmptyFiles.length} empty file(s)`);
+
+  // Format bytes freed
+  const bytesFreed = result.bytesFreed;
+  if (bytesFreed > 0) {
+    const mb = (bytesFreed / (1024 * 1024)).toFixed(2);
+    const kb = (bytesFreed / 1024).toFixed(2);
+    lines.push(`Space freed: ${bytesFreed} bytes (${kb} KB, ${mb} MB)`);
+  }
 
   if (result.errors.length > 0) {
     lines.push(`\nErrors (${result.errors.length}):`);
