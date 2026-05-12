@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/shaftoe/pi-token-usage/compare/v0.1.5...v0.2.0) (2026-05-12)
+
+
+### Features
+
+* add prune command to delete old sessions ([#4](https://github.com/shaftoe/pi-token-usage/issues/4)) ([4a1efee](https://github.com/shaftoe/pi-token-usage/commit/4a1efee2646cb778c72a2a03898f2189e68b229e))
+
 ## [0.1.5](https://github.com/shaftoe/pi-token-usage/compare/v0.1.4...v0.1.5) (2026-05-12)
 
 
