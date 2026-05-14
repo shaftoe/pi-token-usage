@@ -2,7 +2,6 @@ import type { OutputFormat, ParsedArgs, ReportMeta } from "./types.js";
 import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
-import { Temporal } from "@js-temporal/polyfill";
 import { parseArgs } from "./utils.js";
 import { scanAndAggregate } from "./parser.js";
 import { renderTable } from "./renderers/table.js";
@@ -43,7 +42,7 @@ const DAILY_FORMATTERS: Record<OutputFormat, typeof renderDailyTable> = {
  */
 export function computeSinceMs(daysArg: number | null): number | null {
   if (daysArg === null) return null;
-  return Temporal.Now.zonedDateTimeISO().subtract({ days: daysArg }).toInstant().epochMilliseconds;
+  return Date.now() - daysArg * 24 * 60 * 60 * 1000;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

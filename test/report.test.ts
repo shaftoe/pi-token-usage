@@ -38,25 +38,41 @@ describe("computeSinceMs", () => {
     expect(ms).toBeTypeOf("number");
     expect(ms!).toBeGreaterThan(0);
 
-    // Should be roughly 7 days ago (within a small tolerance)
+    // daysArg=7 → Date.now() - 7 * 24h
     const now = Date.now();
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
     const diff = Math.abs(now - ms! - sevenDaysMs);
-    expect(diff).toBeLessThan(5000); // within 5 seconds tolerance
+    expect(diff).toBeLessThan(1000); // within 1 second tolerance
   });
 
-  test("returns 0 for daysArg=0 (everything from epoch)", () => {
-    // daysArg=0 means "subtract 0 days" → effectively now-ish
-    const ms = computeSinceMs(0);
+  test("daysArg=1 returns roughly 24 hours ago", () => {
+    const ms = computeSinceMs(1);
     expect(ms).toBeTypeOf("number");
-    // Should be very close to now
-    expect(Math.abs(Date.now() - ms!)).toBeLessThan(5000);
+    // Should be approximately 1 day ago from now
+    const elapsed = Date.now() - ms!;
+    expect(elapsed).toBeGreaterThan(0);
+    expect(elapsed).toBeLessThanOrEqual(24 * 60 * 60 * 1000);
+  });
+
+  test("daysArg=0 returns now", () => {
+    const ms = computeSinceMs(0)!;
+    // Date.now() - 0 = now (approximately)
+    expect(ms).toBeGreaterThan(Date.now() - 1000);
+    expect(ms).toBeLessThanOrEqual(Date.now());
   });
 
   test("larger daysArg produces older cutoff", () => {
     const ms7 = computeSinceMs(7)!;
     const ms30 = computeSinceMs(30)!;
     expect(ms30).toBeLessThan(ms7);
+  });
+
+  test("daysArg=2 returns roughly 48 hours ago", () => {
+    const ms = computeSinceMs(2)!;
+    const now = Date.now();
+    const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
+    const diff = Math.abs(now - ms - twoDaysMs);
+    expect(diff).toBeLessThan(1000); // within 1 second tolerance
   });
 });
 
@@ -115,8 +131,8 @@ describe("generateReport", () => {
 
     expect(report).toContain("Token Usage Report");
     expect(report).toContain("TOTAL");
-    expect(meta.fileCount).toBe(5);
-    expect(meta.sessionCount).toBe(5);
+    expect(meta.fileCount).toBe(6);
+    expect(meta.sessionCount).toBe(6);
     expect(meta.errorCount).toBe(2);
     expect(meta.targetDesc).toBe(FIXTURES);
   });
@@ -158,7 +174,7 @@ describe("generateReport", () => {
     const { report, meta } = await generateReport(parsed);
 
     // With a 10-year window, should still find all fixture files
-    expect(meta.fileCount).toBe(5);
+    expect(meta.fileCount).toBe(6);
     expect(report).toContain("TOTAL");
   });
 
