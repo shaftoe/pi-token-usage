@@ -172,11 +172,12 @@ describe("collectJsonlFiles", () => {
 
 describe("scanAndAggregate", () => {
   test("aggregates all files in fixtures directory", async () => {
-    const { acc, fileCount } = await scanAndAggregate(FIXTURES, null);
+    const { acc, dailyAcc, fileCount } = await scanAndAggregate(FIXTURES, null);
 
     expect(fileCount).toBe(5);
     expect(acc.sessions).toBe(5);
     expect(acc.errors).toBe(2);
+    expect(dailyAcc).toBeNull();
 
     const rows = acc.getRows();
     expect(rows.length).toBeGreaterThanOrEqual(2);
@@ -200,5 +201,28 @@ describe("scanAndAggregate", () => {
     const { fileCount, acc } = await scanAndAggregate(join(__dirname, "..", "package.json"), null);
     expect(fileCount).toBe(0);
     expect(acc.sessions).toBe(0);
+  });
+
+  test("populates daily accumulator when daily=true", async () => {
+    const { acc, dailyAcc, fileCount } = await scanAndAggregate(FIXTURES, null, true);
+
+    expect(fileCount).toBe(5);
+    expect(dailyAcc).not.toBeNull();
+    expect(dailyAcc!.sessions).toBe(acc.sessions);
+
+    const dailyRows = dailyAcc!.getRows();
+    expect(dailyRows.length).toBeGreaterThanOrEqual(1);
+
+    // Each row should have a date
+    for (const r of dailyRows) {
+      expect(r.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+
+    const dailyTotals = dailyAcc!.getDailyTotals();
+    expect(dailyTotals.length).toBeGreaterThanOrEqual(1);
+
+    const grandTotals = dailyAcc!.getGrandTotals();
+    expect(grandTotals.turns).toBe(acc.getTotals().turns);
+    expect(grandTotals.totalTokens).toBe(acc.getTotals().totalTokens);
   });
 });

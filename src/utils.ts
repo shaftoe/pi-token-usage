@@ -58,6 +58,7 @@ export function parseArgs(rawArgs: string, cwd: string): ParsedArgs {
   let targetDesc: string | null = null;
   let format: OutputFormat = "table";
   let savePath: string | null = null;
+  let daily = false;
 
   let i = 0;
   while (i < tokens.length) {
@@ -78,6 +79,8 @@ export function parseArgs(rawArgs: string, cwd: string): ParsedArgs {
       const f = normalizeFormat(val);
       if (!f) throw new Error(`Invalid format: "${val}". Use table, csv, json, or markdown.`);
       format = f;
+    } else if (tok === "--daily" || tok === "-d") {
+      daily = true;
     } else if (/^\d+$/.test(tok)) {
       daysArg = parseInt(tok, 10);
     } else {
@@ -98,5 +101,5 @@ export function parseArgs(rawArgs: string, cwd: string): ParsedArgs {
   }
   if (!targetDesc) targetDesc = targetPath;
 
-  return { daysArg, targetPath, targetDesc, format, savePath };
+  return { daysArg, targetPath, targetDesc, format, savePath, daily };
 }

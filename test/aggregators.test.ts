@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { StatsAccumulator } from "../src/aggregators.js";
+import { StatsAccumulator, DailyStatsAccumulator } from "../src/aggregators.js";
 
 describe("StatsAccumulator", () => {
   test("starts empty", () => {
@@ -154,5 +154,118 @@ describe("StatsAccumulator", () => {
     expect(rows[0]!.model).toBe("big");
     expect(rows[1]!.model).toBe("medium");
     expect(rows[2]!.model).toBe("small");
+  });
+});
+
+describe("DailyStatsAccumulator", () => {
+  test("starts empty", () => {
+    const acc = new DailyStatsAccumulator();
+    expect(acc.sessions).toBe(0);
+    expect(acc.errors).toBe(0);
+    expect(acc.getRows()).toHaveLength(0);
+    expect(acc.getDailyTotals()).toHaveLength(0);
+  });
+
+  test("accumulates a single message with date", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "gpt-4o", "openai", {
+      input: 100,
+      output: 50,
+      totalTokens: 150,
+      cost: { input: 0.0003, output: 0.00015, total: 0.00045 },
+    });
+
+    const rows = acc.getRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.date).toBe("2025-01-15");
+    expect(rows[0]!.model).toBe("gpt-4o");
+    expect(rows[0]!.turns).toBe(1);
+    expect(rows[0]!.totalTokens).toBe(150);
+  });
+
+  test("tracks daily totals", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "gpt-4o", "openai", { input: 100, output: 50, totalTokens: 150 });
+    acc.addAssistantMessage("2025-01-15", "claude", "anthropic", { input: 200, output: 100, totalTokens: 300 });
+
+    const dailyTotals = acc.getDailyTotals();
+    expect(dailyTotals).toHaveLength(1);
+    expect(dailyTotals[0]!.date).toBe("2025-01-15");
+    expect(dailyTotals[0]!.turns).toBe(2);
+    expect(dailyTotals[0]!.totalTokens).toBe(450);
+  });
+
+  test("separates different dates", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "gpt-4o", "openai", { input: 100, output: 50, totalTokens: 150 });
+    acc.addAssistantMessage("2025-01-14", "gpt-4o", "openai", { input: 200, output: 100, totalTokens: 300 });
+
+    const dailyTotals = acc.getDailyTotals();
+    expect(dailyTotals).toHaveLength(2);
+    // Sorted descending by date
+    expect(dailyTotals[0]!.date).toBe("2025-01-15");
+    expect(dailyTotals[1]!.date).toBe("2025-01-14");
+  });
+
+  test("merges same date + provider + model", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "gpt-4o", "openai", { input: 100, output: 50, totalTokens: 150 });
+    acc.addAssistantMessage("2025-01-15", "gpt-4o", "openai", { input: 200, output: 100, totalTokens: 300 });
+
+    const rows = acc.getRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.turns).toBe(2);
+    expect(rows[0]!.totalTokens).toBe(450);
+  });
+
+  test("separates same date, different model", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "gpt-4o", "openai", { input: 100, output: 50, totalTokens: 150 });
+    acc.addAssistantMessage("2025-01-15", "claude", "anthropic", { input: 200, output: 100, totalTokens: 300 });
+
+    const rows = acc.getRows();
+    expect(rows).toHaveLength(2);
+  });
+
+  test("getRows sorts by date descending then totalTokens descending", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-14", "small", "p", { input: 10, totalTokens: 10 });
+    acc.addAssistantMessage("2025-01-15", "big", "p", { input: 1000, totalTokens: 1000 });
+    acc.addAssistantMessage("2025-01-15", "small", "p", { input: 100, totalTokens: 100 });
+
+    const rows = acc.getRows();
+    expect(rows[0]!.date).toBe("2025-01-15");
+    expect(rows[0]!.model).toBe("big");
+    expect(rows[1]!.date).toBe("2025-01-15");
+    expect(rows[1]!.model).toBe("small");
+    expect(rows[2]!.date).toBe("2025-01-14");
+  });
+
+  test("getGrandTotals sums across all dates and models", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "m1", "p1", { input: 100, output: 50, totalTokens: 150 });
+    acc.addAssistantMessage("2025-01-14", "m2", "p2", { input: 200, output: 100, totalTokens: 300 });
+
+    const grand = acc.getGrandTotals();
+    expect(grand.turns).toBe(2);
+    expect(grand.totalTokens).toBe(450);
+    expect(grand.inputTokens).toBe(300);
+    expect(grand.outputTokens).toBe(150);
+  });
+
+  test("getGrandTotals returns zeros when empty", () => {
+    const acc = new DailyStatsAccumulator();
+    const grand = acc.getGrandTotals();
+    expect(grand.turns).toBe(0);
+    expect(grand.totalTokens).toBe(0);
+  });
+
+  test("handles missing usage fields as zero", () => {
+    const acc = new DailyStatsAccumulator();
+    acc.addAssistantMessage("2025-01-15", "m", "p", {});
+
+    const rows = acc.getRows();
+    expect(rows[0]!.totalTokens).toBe(0);
+    expect(rows[0]!.costTotal).toBe(0);
   });
 });

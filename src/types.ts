@@ -68,6 +68,14 @@ export interface ModelStats {
 
 export type Totals = Omit<ModelStats, "model" | "provider">;
 
+export interface DailyModelStats extends ModelStats {
+  date: string; // YYYY-MM-DD
+}
+
+export interface DailyTotals extends Totals {
+  date: string; // YYYY-MM-DD
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Report metadata (passed to all renderers)
 // ──────────────────────────────────────────────────────────────────────────────
@@ -92,4 +100,5 @@ export interface ParsedArgs {
   targetDesc: string;
   format: OutputFormat;
   savePath: string | null;
+  daily: boolean;
 }

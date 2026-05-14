@@ -19,6 +19,7 @@ function makeParsed(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     targetDesc: FIXTURES,
     format: "table",
     savePath: null,
+    daily: false,
     ...overrides,
   };
 }

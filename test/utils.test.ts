@@ -55,6 +55,7 @@ describe("parseArgs", () => {
     expect(result.targetDesc).toBe("~/.pi/agent/sessions");
     expect(result.format).toBe("table");
     expect(result.savePath).toBeNull();
+    expect(result.daily).toBe(false);
   });
 
   test("parses numeric arg as daysArg", () => {
@@ -125,6 +126,23 @@ describe("parseArgs", () => {
 
   test("throws on multiple positional arguments", () => {
     expect(() => parseArgs("path1 path2", "/cwd")).toThrow('Unexpected argument: "path2"');
+  });
+
+  test("parses --daily flag", () => {
+    const result = parseArgs("--daily", "/cwd");
+    expect(result.daily).toBe(true);
+  });
+
+  test("parses -d shorthand for daily", () => {
+    const result = parseArgs("-d", "/cwd");
+    expect(result.daily).toBe(true);
+  });
+
+  test("combines daily with days and format", () => {
+    const result = parseArgs("7 --daily --format csv", "/cwd");
+    expect(result.daysArg).toBe(7);
+    expect(result.daily).toBe(true);
+    expect(result.format).toBe("csv");
   });
 });
 

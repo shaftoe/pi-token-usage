@@ -1,7 +1,7 @@
 /**
  * Token Usage Report Extension
  *
- * /token-report [days|path] [--format table|csv|json|markdown] [--save path]
+ * /token-report [days|path] [--format table|csv|json|markdown] [--save path] [--daily]
  * /token-prune <days> [--dry-run] [--force] [--path <dir>]
  *
  * Reads JSONL session files and produces a report showing token usage
@@ -15,6 +15,8 @@
  *   /token-report --format csv --save report.csv  — CSV to file
  *   /token-report 7 --format json     — JSON to stdout
  *   /token-report --format md         — Markdown to stdout
+ *   /token-report --daily             — Daily breakdown by date × model
+ *   /token-report 7 --daily --format csv — Daily CSV for last 7 days
  *
  * Prune examples:
  *   /token-prune 30              — delete sessions older than 30 days
@@ -33,7 +35,7 @@ import { handlePrune } from "./prune.js";
 
 export default function (pi: ExtensionAPI) {
   pi.registerCommand("token-report", {
-    description: "Token usage per model. Args: [days|path] [--format table|csv|json|md] [--save file]",
+    description: "Token usage per model. Args: [days|path] [--format table|csv|json|md] [--save file] [--daily]",
     handler: handleReport,
   });
 

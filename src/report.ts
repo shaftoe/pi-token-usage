@@ -9,6 +9,10 @@ import { renderTable } from "./renderers/table.js";
 import { renderCsv } from "./renderers/csv.js";
 import { renderJson } from "./renderers/json.js";
 import { renderMarkdown } from "./renderers/markdown.js";
+import { renderDailyTable } from "./renderers/daily-table.js";
+import { renderDailyCsv } from "./renderers/daily-csv.js";
+import { renderDailyJson } from "./renderers/daily-json.js";
+import { renderDailyMarkdown } from "./renderers/daily-markdown.js";
 import { showTuiOverlay } from "./ui.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -20,6 +24,13 @@ const FORMATTERS: Record<OutputFormat, typeof renderTable> = {
   csv: renderCsv,
   json: renderJson,
   markdown: renderMarkdown,
+};
+
+const DAILY_FORMATTERS: Record<OutputFormat, typeof renderDailyTable> = {
+  table: renderDailyTable,
+  csv: renderDailyCsv,
+  json: renderDailyJson,
+  markdown: renderDailyMarkdown,
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -90,7 +101,7 @@ export async function generateReport(parsed: ParsedArgs): Promise<ReportData> {
   }
 
   const sinceMs = computeSinceMs(parsed.daysArg);
-  const { acc, fileCount } = await scanAndAggregate(parsed.targetPath, sinceMs);
+  const { acc, dailyAcc, fileCount } = await scanAndAggregate(parsed.targetPath, sinceMs, parsed.daily);
 
   if (fileCount === 0) {
     throw new NoFilesError();
@@ -100,8 +111,17 @@ export async function generateReport(parsed: ParsedArgs): Promise<ReportData> {
   const totals = acc.getTotals();
   const meta = buildReportMeta(acc, fileCount, parsed);
 
-  const render = FORMATTERS[parsed.format];
-  const report = render(rows, totals, meta);
+  let report: string;
+  if (parsed.daily && dailyAcc) {
+    const dailyRows = dailyAcc.getRows();
+    const dailyTotals = dailyAcc.getDailyTotals();
+    const grandTotals = dailyAcc.getGrandTotals();
+    const render = DAILY_FORMATTERS[parsed.format];
+    report = render(dailyRows, dailyTotals, grandTotals, meta);
+  } else {
+    const render = FORMATTERS[parsed.format];
+    report = render(rows, totals, meta);
+  }
 
   return { report, meta };
 }

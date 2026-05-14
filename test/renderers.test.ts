@@ -3,7 +3,11 @@ import { renderTable } from "../src/renderers/table.js";
 import { renderCsv } from "../src/renderers/csv.js";
 import { renderJson } from "../src/renderers/json.js";
 import { renderMarkdown } from "../src/renderers/markdown.js";
-import type { ModelStats, ReportMeta, Totals } from "../src/types.js";
+import { renderDailyTable } from "../src/renderers/daily-table.js";
+import { renderDailyCsv } from "../src/renderers/daily-csv.js";
+import { renderDailyJson } from "../src/renderers/daily-json.js";
+import { renderDailyMarkdown } from "../src/renderers/daily-markdown.js";
+import type { DailyModelStats, DailyTotals, ModelStats, ReportMeta, Totals } from "../src/types.js";
 
 // Shared test data
 const rows: ModelStats[] = [
@@ -303,5 +307,240 @@ describe("renderMarkdown", () => {
     const result = renderMarkdown(rows, totals, { ...meta, daysArg: null });
     expect(result).not.toContain("last");
     expect(result).not.toContain("day");
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Daily renderer test data
+// ──────────────────────────────────────────────────────────────────────────────
+
+const dailyRows: DailyModelStats[] = [
+  {
+    date: "2025-01-15",
+    model: "claude-sonnet-4-20250514",
+    provider: "anthropic",
+    turns: 5,
+    inputTokens: 25000,
+    outputTokens: 6000,
+    cacheReadTokens: 4000,
+    cacheWriteTokens: 1000,
+    totalTokens: 36000,
+    costInput: 0.075,
+    costOutput: 0.018,
+    costCacheRead: 0.002,
+    costCacheWrite: 0.0025,
+    costTotal: 0.0975,
+  },
+  {
+    date: "2025-01-15",
+    model: "gpt-4o",
+    provider: "openai",
+    turns: 3,
+    inputTokens: 10000,
+    outputTokens: 4000,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+    totalTokens: 14000,
+    costInput: 0.03,
+    costOutput: 0.012,
+    costCacheRead: 0,
+    costCacheWrite: 0,
+    costTotal: 0.042,
+  },
+  {
+    date: "2025-01-14",
+    model: "claude-sonnet-4-20250514",
+    provider: "anthropic",
+    turns: 2,
+    inputTokens: 10000,
+    outputTokens: 3000,
+    cacheReadTokens: 2000,
+    cacheWriteTokens: 0,
+    totalTokens: 15000,
+    costInput: 0.03,
+    costOutput: 0.009,
+    costCacheRead: 0.001,
+    costCacheWrite: 0,
+    costTotal: 0.04,
+  },
+];
+
+const dailyTotals: DailyTotals[] = [
+  {
+    date: "2025-01-15",
+    turns: 8,
+    inputTokens: 35000,
+    outputTokens: 10000,
+    cacheReadTokens: 4000,
+    cacheWriteTokens: 1000,
+    totalTokens: 50000,
+    costInput: 0.105,
+    costOutput: 0.03,
+    costCacheRead: 0.002,
+    costCacheWrite: 0.0025,
+    costTotal: 0.1395,
+  },
+  {
+    date: "2025-01-14",
+    turns: 2,
+    inputTokens: 10000,
+    outputTokens: 3000,
+    cacheReadTokens: 2000,
+    cacheWriteTokens: 0,
+    totalTokens: 15000,
+    costInput: 0.03,
+    costOutput: 0.009,
+    costCacheRead: 0.001,
+    costCacheWrite: 0,
+    costTotal: 0.04,
+  },
+];
+
+const grandTotals: Totals = {
+  turns: 10,
+  inputTokens: 45000,
+  outputTokens: 13000,
+  cacheReadTokens: 6000,
+  cacheWriteTokens: 1000,
+  totalTokens: 65000,
+  costInput: 0.135,
+  costOutput: 0.039,
+  costCacheRead: 0.003,
+  costCacheWrite: 0.0025,
+  costTotal: 0.1795,
+};
+
+describe("renderDailyTable", () => {
+  test("renders a daily table with date groups and totals", () => {
+    const result = renderDailyTable(dailyRows, dailyTotals, grandTotals, meta);
+
+    expect(result).toContain("Token Usage Report (daily)");
+    expect(result).toContain("2025-01-15");
+    expect(result).toContain("2025-01-14");
+    expect(result).toContain("claude-sonnet-4-20250514");
+    expect(result).toContain("gpt-4o");
+    expect(result).toContain("GRAND TOTAL");
+    expect(result).toContain("2025-01-15 TOTAL");
+    expect(result).toContain("2025-01-14 TOTAL");
+  });
+
+  test("shows empty message when no rows", () => {
+    const result = renderDailyTable(
+      [],
+      [],
+      {
+        turns: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheReadTokens: 0,
+        cacheWriteTokens: 0,
+        totalTokens: 0,
+        costInput: 0,
+        costOutput: 0,
+        costCacheRead: 0,
+        costCacheWrite: 0,
+        costTotal: 0,
+      },
+      meta,
+    );
+    expect(result).toContain("No assistant messages");
+  });
+
+  test("shows window when daysArg is set", () => {
+    const result = renderDailyTable(dailyRows, dailyTotals, grandTotals, { ...meta, daysArg: 7 });
+    expect(result).toContain("last 7 days");
+  });
+});
+
+describe("renderDailyCsv", () => {
+  test("renders CSV with Date column and daily totals", () => {
+    const result = renderDailyCsv(dailyRows, dailyTotals, grandTotals, meta);
+    const lines = result.split("\n");
+
+    // Header row includes Date
+    expect(lines[0]).toContain("Date");
+    expect(lines[0]).toContain("Model");
+
+    // Data + daily TOTAL rows + GRAND TOTAL row
+    const dataLines = lines.filter((l) => !l.startsWith("#") && l.trim().length > 0);
+    // header + 2 models (Jan 15) + Jan 15 TOTAL + 1 model (Jan 14) + Jan 14 TOTAL + GRAND TOTAL = 7
+    expect(dataLines.length).toBe(7);
+  });
+
+  test("includes GRAND TOTAL", () => {
+    const result = renderDailyCsv(dailyRows, dailyTotals, grandTotals, meta);
+    expect(result).toContain("GRAND TOTAL");
+    expect(result).toContain("65000");
+  });
+
+  test("includes metadata as comments", () => {
+    const result = renderDailyCsv(dailyRows, dailyTotals, grandTotals, meta);
+    expect(result).toContain("# Token Usage Report (daily)");
+  });
+});
+
+describe("renderDailyJson", () => {
+  test("renders valid JSON with daily structure", () => {
+    const result = renderDailyJson(dailyRows, dailyTotals, grandTotals, meta);
+    const parsed = JSON.parse(result);
+
+    expect(parsed.meta.daily).toBe(true);
+    expect(parsed.meta.target).toBe("~/.pi/agent/sessions");
+    expect(parsed.days).toHaveLength(2);
+    expect(parsed.days[0].date).toBe("2025-01-15");
+    expect(parsed.days[0].models).toHaveLength(2);
+    expect(parsed.days[1].date).toBe("2025-01-14");
+    expect(parsed.days[1].models).toHaveLength(1);
+    expect(parsed.grandTotals.totalTokens).toBe(65000);
+  });
+
+  test("null window when no days filter", () => {
+    const result = renderDailyJson(dailyRows, dailyTotals, grandTotals, { ...meta, daysArg: null });
+    const parsed = JSON.parse(result);
+    expect(parsed.meta.window).toBeNull();
+  });
+});
+
+describe("renderDailyMarkdown", () => {
+  test("renders a markdown table with daily groups", () => {
+    const result = renderDailyMarkdown(dailyRows, dailyTotals, grandTotals, meta);
+
+    expect(result).toContain("## Token Usage Report (daily)");
+    expect(result).toContain("2025-01-15");
+    expect(result).toContain("2025-01-14");
+    expect(result).toContain("**GRAND TOTAL**");
+  });
+
+  test("shows empty message when no rows", () => {
+    const result = renderDailyMarkdown(
+      [],
+      [],
+      {
+        turns: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheReadTokens: 0,
+        cacheWriteTokens: 0,
+        totalTokens: 0,
+        costInput: 0,
+        costOutput: 0,
+        costCacheRead: 0,
+        costCacheWrite: 0,
+        costTotal: 0,
+      },
+      meta,
+    );
+    expect(result).toContain("No assistant messages");
+  });
+
+  test("includes session metadata", () => {
+    const result = renderDailyMarkdown(dailyRows, dailyTotals, grandTotals, meta);
+    expect(result).toContain("**Sessions:** 8");
+    expect(result).toContain("**Files:** 12");
+  });
+
+  test("shows window when daysArg is set", () => {
+    const result = renderDailyMarkdown(dailyRows, dailyTotals, grandTotals, { ...meta, daysArg: 7 });
+    expect(result).toContain("last 7 days");
   });
 });

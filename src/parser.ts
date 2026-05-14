@@ -3,7 +3,7 @@ import { stat, readdir } from "node:fs/promises";
 import { join, extname } from "node:path";
 import readline from "node:readline";
 import type { AssistantMessagePayload, JsonlEntry, MessageEntry, SessionEntry } from "./types.js";
-import { StatsAccumulator } from "./aggregators.js";
+import { StatsAccumulator, DailyStatsAccumulator } from "./aggregators.js";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Type guards
@@ -25,7 +25,12 @@ function isAssistantMessage(msg: MessageEntry["message"]): msg is AssistantMessa
 // JSONL parsing
 // ──────────────────────────────────────────────────────────────────────────────
 
-export async function parseJsonlFile(filePath: string, acc: StatsAccumulator, sinceMs: number | null): Promise<void> {
+export async function parseJsonlFile(
+  filePath: string,
+  acc: StatsAccumulator,
+  sinceMs: number | null,
+  dailyAcc?: DailyStatsAccumulator,
+): Promise<void> {
   // Filter by mtime if a time window was requested
   if (sinceMs !== null) {
     try {
@@ -44,11 +49,17 @@ export async function parseJsonlFile(filePath: string, acc: StatsAccumulator, si
     });
   } catch {
     acc.addError();
+    dailyAcc?.addError();
     return;
   }
 
   let sessionProvider = "unknown";
   let counted = false;
+
+  // Extract date from ISO timestamp (YYYY-MM-DD)
+  function extractDate(ts: string): string {
+    return ts.length >= 10 ? ts.slice(0, 10) : ts;
+  }
 
   try {
     for await (const line of rl) {
@@ -59,12 +70,14 @@ export async function parseJsonlFile(filePath: string, acc: StatsAccumulator, si
         entry = JSON.parse(line) as JsonlEntry;
       } catch {
         acc.addError();
+        dailyAcc?.addError();
         continue;
       }
 
       if (isSessionEntry(entry)) {
         if (!counted) {
           acc.addSession();
+          dailyAcc?.addSession();
           counted = true;
         }
         if (entry.provider) sessionProvider = entry.provider;
@@ -81,9 +94,15 @@ export async function parseJsonlFile(filePath: string, acc: StatsAccumulator, si
       const provider = msg.provider ?? sessionProvider;
 
       acc.addAssistantMessage(model, provider, msg.usage);
+
+      if (dailyAcc) {
+        const date = extractDate(entry.timestamp);
+        dailyAcc.addAssistantMessage(date, model, provider, msg.usage);
+      }
     }
   } catch {
     acc.addError();
+    dailyAcc?.addError();
   } finally {
     rl.close();
   }
@@ -121,7 +140,8 @@ export async function collectJsonlFiles(dirPath: string): Promise<string[]> {
 export async function scanAndAggregate(
   targetPath: string,
   sinceMs: number | null,
-): Promise<{ acc: StatsAccumulator; fileCount: number }> {
+  daily = false,
+): Promise<{ acc: StatsAccumulator; dailyAcc: DailyStatsAccumulator | null; fileCount: number }> {
   const pathStat = await stat(targetPath);
   let files: string[];
 
@@ -132,10 +152,11 @@ export async function scanAndAggregate(
   }
 
   const acc = new StatsAccumulator();
+  const dailyAcc = daily ? new DailyStatsAccumulator() : null;
 
   for (const f of files) {
-    await parseJsonlFile(f, acc, sinceMs);
+    await parseJsonlFile(f, acc, sinceMs, dailyAcc ?? undefined);
   }
 
-  return { acc, fileCount: files.length };
+  return { acc, dailyAcc, fileCount: files.length };
 }
