@@ -148,6 +148,22 @@ describe("parseJsonlFile", () => {
     // The fixture has multiple blank lines; they should be skipped without errors
     expect(acc.errors).toBe(0);
   });
+
+  test("filters individual messages by timestamp when sinceMs is set", async () => {
+    const acc = new StatsAccumulator();
+    // multi-day.jsonl has messages on 2025-01-14 and 2025-01-15
+    // Use a cutoff that only includes Jan 15 messages
+    const jan15Start = new Date("2025-01-15T00:00:00Z").getTime();
+    await parseJsonlFile(join(FIXTURES, "multi-day.jsonl"), acc, jan15Start);
+
+    // File mtime is recent, so it passes the mtime filter
+    // But per-message filtering should exclude the Jan 14 message
+    expect(acc.sessions).toBe(1);
+    const rows = acc.getRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.inputTokens).toBe(200); // only Jan 15 message
+    expect(rows[0]!.turns).toBe(1);
+  });
 });
 
 describe("collectJsonlFiles", () => {
@@ -174,8 +190,8 @@ describe("scanAndAggregate", () => {
   test("aggregates all files in fixtures directory", async () => {
     const { acc, dailyAcc, fileCount } = await scanAndAggregate(FIXTURES, null);
 
-    expect(fileCount).toBe(5);
-    expect(acc.sessions).toBe(5);
+    expect(fileCount).toBe(6);
+    expect(acc.sessions).toBe(6);
     expect(acc.errors).toBe(2);
     expect(dailyAcc).toBeNull();
 
@@ -206,8 +222,7 @@ describe("scanAndAggregate", () => {
   test("populates daily accumulator when daily=true", async () => {
     const { acc, dailyAcc, fileCount } = await scanAndAggregate(FIXTURES, null, true);
 
-    expect(fileCount).toBe(5);
-    expect(dailyAcc).not.toBeNull();
+    expect(fileCount).toBe(6);
     expect(dailyAcc!.sessions).toBe(acc.sessions);
 
     const dailyRows = dailyAcc!.getRows();

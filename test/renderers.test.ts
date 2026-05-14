@@ -117,6 +117,47 @@ describe("renderTable", () => {
     expect(result).not.toContain("day");
   });
 
+  test("renders billion-scale token counts without truncation", () => {
+    const bigRow: ModelStats = {
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
+      turns: 99999,
+      inputTokens: 999999999,
+      outputTokens: 999999999,
+      cacheReadTokens: 9999999999,
+      cacheWriteTokens: 999999999,
+      totalTokens: 99999999999,
+      costInput: 0,
+      costOutput: 0,
+      costCacheRead: 0,
+      costCacheWrite: 0,
+      costTotal: 0,
+    };
+
+    const bigTotals: Totals = {
+      turns: bigRow.turns,
+      inputTokens: bigRow.inputTokens,
+      outputTokens: bigRow.outputTokens,
+      cacheReadTokens: bigRow.cacheReadTokens,
+      cacheWriteTokens: bigRow.cacheWriteTokens,
+      totalTokens: bigRow.totalTokens,
+      costInput: bigRow.costInput,
+      costOutput: bigRow.costOutput,
+      costCacheRead: bigRow.costCacheRead,
+      costCacheWrite: bigRow.costCacheWrite,
+      costTotal: bigRow.costTotal,
+    };
+
+    const result = renderTable([bigRow], bigTotals, meta);
+    const lines = result.split("\n");
+
+    // The TOTAL row should contain the full cacheRead value (9,999,999,999)
+    const totalLine = lines.find((l) => l.includes("TOTAL"));
+    expect(totalLine).toBeDefined();
+    expect(totalLine).toContain("9,999,999,999"); // cacheRead - must not be truncated
+    expect(totalLine).toContain("99,999,999,999"); // totalTokens - must not be truncated
+  });
+
   test("truncates long model names with ellipsis to prevent column overlap", () => {
     const longModelRow: ModelStats = {
       model: "gemini-2.5-flash-lite-preview",

@@ -90,6 +90,12 @@ export async function parseJsonlFile(
       const msg = entry.message;
       if (!msg.usage) continue;
 
+      // Filter individual messages by timestamp when a time window is set
+      if (sinceMs !== null) {
+        const msgMs = new Date(entry.timestamp).getTime();
+        if (Number.isNaN(msgMs) || msgMs < sinceMs) continue;
+      }
+
       const model = msg.model ?? "unknown";
       const provider = msg.provider ?? sessionProvider;
 

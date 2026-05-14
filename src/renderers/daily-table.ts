@@ -7,14 +7,14 @@ const COL_PROV = 12;
 const COL_TURNS = 7;
 const COL_IN = 12;
 const COL_OUT = 12;
-const COL_CR = 12;
-const COL_CW = 12;
-const COL_TOT = 14;
-const COL_COST = 12;
+const COL_CR = 14;
+const COL_CW = 13;
+const COL_TOT = 15;
+const COL_COST = 13;
 
 const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 const pad = (s: string, n: number) => truncate(s, n).padEnd(n);
-const rpad = (s: string, n: number) => s.slice(0, n).padStart(n);
+const rpad = (s: string, n: number) => s.padStart(n);
 
 function statsLine(
   r: {
