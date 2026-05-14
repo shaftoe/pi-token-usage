@@ -5,6 +5,8 @@ A [Pi coding agent](https://pi.dev) extension that
 - analyzes token usage and cost across your session files
 - prunes old sessions files on demand
 
+![Sample report output](docs/sample.png)
+
 ## Installation
 
 ```bash
