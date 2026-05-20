@@ -48,7 +48,7 @@ pi -e ./pi-token-usage/src/index.ts
 | Argument | Description |
 |----------|-------------|
 | `[days]` | Number — show sessions from the last N days |
-| `[path]` | Path to a `.jsonl` file or directory (default: `~/.pi/agent/sessions`) |
+| `[path]` | Path to a `.jsonl` file or directory (default: `~/.pi/agent/sessions`, or `$PI_CODING_AGENT_DIR/sessions` when set) |
 | `--format, -f` | Output format: `table` (default), `csv`, `json`, `markdown` (alias: `md`) |
 | `--save, -s` | Write output to file instead of stdout/TUI |
 
@@ -59,7 +59,7 @@ pi -e ./pi-token-usage/src/index.ts
 | `<days>` | Number (required) — delete sessions older than N days |
 | `--dry-run, -d` | Preview what would be deleted without actually deleting |
 | `--force, -f` | Skip confirmation prompt when deleting many files |
-| `--path, -p` | Path to a directory (default: `~/.pi/agent/sessions`) |
+| `--path, -p` | Path to a directory (default: `~/.pi/agent/sessions`, or `$PI_CODING_AGENT_DIR/sessions` when set) |
 
 ### Prune Behavior
 
@@ -106,7 +106,7 @@ bun test:coverage     # Run tests and show coverage stats
 
 ### Report Generation
 
-1. Scans `~/.pi/agent/sessions` (or given path) for `.jsonl` session files
+1. Scans `~/.pi/agent/sessions` (or `$PI_CODING_AGENT_DIR/sessions` when set, or a given path) for `.jsonl` session files
 2. Parses each file, extracting `assistant` messages with `usage` data
 3. Aggregates token counts and costs per model+provider
 4. Renders in the requested format

@@ -5,6 +5,21 @@ import { tmpdir } from "node:os";
 import { parsePruneArgs, pruneSessions, formatPruneReport } from "../src/prune.js";
 
 describe("parsePruneArgs", () => {
+  let originalPiCodingAgentDir: string | undefined;
+
+  beforeEach(() => {
+    originalPiCodingAgentDir = process.env.PI_CODING_AGENT_DIR;
+    delete process.env.PI_CODING_AGENT_DIR;
+  });
+
+  afterEach(() => {
+    if (originalPiCodingAgentDir === undefined) {
+      delete process.env.PI_CODING_AGENT_DIR;
+      return;
+    }
+    process.env.PI_CODING_AGENT_DIR = originalPiCodingAgentDir;
+  });
+
   test("throws error for empty input", () => {
     expect(() => parsePruneArgs("", "/cwd")).toThrow("Missing required argument: days");
   });
@@ -55,6 +70,14 @@ describe("parsePruneArgs", () => {
   test("uses default sessions directory when no path provided", () => {
     const result = parsePruneArgs("30", "/cwd");
     expect(result.targetPath).toContain(".pi");
+  });
+
+  test("uses PI_CODING_AGENT_DIR for default target path", () => {
+    process.env.PI_CODING_AGENT_DIR = "/custom/pi-agent";
+
+    const result = parsePruneArgs("30", "/cwd");
+
+    expect(result.targetPath).toBe("/custom/pi-agent/sessions");
   });
 
   test("throws error for missing days argument", () => {
