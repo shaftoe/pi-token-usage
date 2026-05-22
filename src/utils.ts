@@ -39,7 +39,15 @@ export function fmtDaysLabel(daysArg: number | null): string | null {
 // Argument parsing
 // ──────────────────────────────────────────────────────────────────────────────
 
-export const DEFAULT_SESSIONS_DIR = () => resolve(homedir(), ".pi", "agent", "sessions");
+export const DEFAULT_PI_CODING_AGENT_DIR = () => {
+  const configuredDir = process.env.PI_CODING_AGENT_DIR?.trim();
+  return configuredDir ? resolve(configuredDir) : resolve(homedir(), ".pi", "agent");
+};
+
+export const DEFAULT_SESSIONS_DIR = () => resolve(DEFAULT_PI_CODING_AGENT_DIR(), "sessions");
+
+export const DEFAULT_SESSIONS_DESC = () =>
+  process.env.PI_CODING_AGENT_DIR?.trim() ? DEFAULT_SESSIONS_DIR() : "~/.pi/agent/sessions";
 
 const VALID_FORMATS: OutputFormat[] = ["table", "csv", "json", "markdown"];
 
@@ -94,7 +102,7 @@ export function parseArgs(rawArgs: string, cwd: string): ParsedArgs {
 
   if (!targetPath) {
     targetPath = DEFAULT_SESSIONS_DIR();
-    targetDesc = "~/.pi/agent/sessions";
+    targetDesc = DEFAULT_SESSIONS_DESC();
   }
   if (!targetDesc) targetDesc = targetPath;
 

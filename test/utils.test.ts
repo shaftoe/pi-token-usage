@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { fmt, fmtUsd, csvQuote, parseArgs, DEFAULT_SESSIONS_DIR, fmtDaysSuffix, fmtDaysLabel } from "../src/utils.js";
 
 describe("fmt", () => {
@@ -48,6 +48,21 @@ describe("csvQuote", () => {
 });
 
 describe("parseArgs", () => {
+  let originalPiCodingAgentDir: string | undefined;
+
+  beforeEach(() => {
+    originalPiCodingAgentDir = process.env.PI_CODING_AGENT_DIR;
+    delete process.env.PI_CODING_AGENT_DIR;
+  });
+
+  afterEach(() => {
+    if (originalPiCodingAgentDir === undefined) {
+      delete process.env.PI_CODING_AGENT_DIR;
+      return;
+    }
+    process.env.PI_CODING_AGENT_DIR = originalPiCodingAgentDir;
+  });
+
   test("returns defaults for empty input", () => {
     const result = parseArgs("", "/cwd");
     expect(result.daysArg).toBeNull();
@@ -55,6 +70,15 @@ describe("parseArgs", () => {
     expect(result.targetDesc).toBe("~/.pi/agent/sessions");
     expect(result.format).toBe("table");
     expect(result.savePath).toBeNull();
+  });
+
+  test("uses PI_CODING_AGENT_DIR for default target path", () => {
+    process.env.PI_CODING_AGENT_DIR = "/custom/pi-agent";
+
+    const result = parseArgs("", "/cwd");
+
+    expect(result.targetPath).toBe("/custom/pi-agent/sessions");
+    expect(result.targetDesc).toBe("/custom/pi-agent/sessions");
   });
 
   test("parses numeric arg as daysArg", () => {
