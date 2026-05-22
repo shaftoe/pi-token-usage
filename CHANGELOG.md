@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/shaftoe/pi-token-usage/compare/v0.2.1...v0.3.0) (2026-05-22)
+
+
+### Features
+
+* respect PI_CODING_AGENT_DIR for sessions path ([#33](https://github.com/shaftoe/pi-token-usage/issues/33)) ([854647b](https://github.com/shaftoe/pi-token-usage/commit/854647b3da54e586cc8d9cd205d0606f321054e8))
+
 ## [0.2.1](https://github.com/shaftoe/pi-token-usage/compare/v0.2.0...v0.2.1) (2026-05-22)
 
 
