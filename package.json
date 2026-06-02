@@ -56,7 +56,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "devDependencies": {
-    "@alexanderfortin/semantic-release-keep-a-changelog": "0.2.3",
+    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.3.0",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
@@ -72,7 +72,7 @@
     "prettier": "^3.8.3",
     "semantic-release": "^25.0.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "8.60.0"
+    "typescript-eslint": "^8.60.1"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1"
