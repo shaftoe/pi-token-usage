@@ -35,8 +35,8 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "^0.86.1",
-    "@earendil-works/pi-tui": "^0.86.1",
+    "@earendil-works/pi-coding-agent": "^0.87.0",
+    "@earendil-works/pi-tui": "^0.87.0",
     "@sinclair/typebox": "*"
   },
   "repository": {
@@ -56,13 +56,13 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "devDependencies": {
-    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.4.13",
+    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.4.14",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^11.0.1",
-    "@semantic-release/github": "^12.0.9",
-    "@semantic-release/npm": "13.1.5",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/npm": "^13.2.0",
     "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/node": "^26.6.2",
     "bun-types": "^1.4.2",
@@ -72,7 +72,7 @@
     "prettier": "^3.9.8",
     "semantic-release": "^25.0.9",
     "typescript": "6",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.1"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1"
