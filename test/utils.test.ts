@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { fmt, fmtUsd, csvQuote, parseArgs, DEFAULT_SESSIONS_DIR, fmtDaysSuffix, fmtDaysLabel } from "../src/utils.js";
 
 describe("fmt", () => {

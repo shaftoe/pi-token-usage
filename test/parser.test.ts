@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { parseJsonlFile, collectJsonlFiles, scanAndAggregate } from "../src/parser.js";
 import { StatsAccumulator } from "../src/aggregators.js";
 import { join, dirname } from "node:path";

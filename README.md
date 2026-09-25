@@ -93,13 +93,13 @@ TOTAL,,15,70000,20000,...
 
 ```bash
 cd pi-token-usage
-bun install           # Install dependencies
-bun run check         # Type-check with tsc
-bun run lint          # Lint with eslint
-bun run format:check  # Verify formatting
-bun run format        # Auto-format with Prettier
-bun test              # Run tests
-bun test:coverage     # Run tests and show coverage stats
+pnpm install         # Install dependencies
+pnpm run check       # Type-check with tsc
+pnpm run lint        # Lint with eslint
+pnpm run format:check  # Verify formatting
+pnpm run format      # Auto-format with Prettier
+pnpm test            # Run tests
+pnpm run test:coverage  # Run tests and show coverage stats
 ```
 
 ## How It Works

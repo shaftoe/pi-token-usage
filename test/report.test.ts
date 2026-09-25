@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { computeSinceMs, buildReportMeta, generateReport, PathNotFoundError, NoFilesError } from "../src/report.js";
 import { StatsAccumulator } from "../src/aggregators.js";
 import type { ParsedArgs } from "../src/types.js";

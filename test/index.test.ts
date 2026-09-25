@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { styleLine, createTuiComponent, showTuiOverlay } from "../src/ui.js";
 import type { ExtensionCommandContext, Theme } from "@earendil-works/pi-coding-agent";
 

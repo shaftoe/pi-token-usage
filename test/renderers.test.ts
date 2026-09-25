@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { renderTable } from "../src/renderers/table.js";
 import { renderCsv } from "../src/renderers/csv.js";
 import { renderJson } from "../src/renderers/json.js";

@@ -10,6 +10,7 @@
     "session-analysis"
   ],
   "type": "module",
+  "packageManager": "pnpm@12.6.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -44,14 +45,14 @@
     "url": "https://github.com/shaftoe/pi-token-usage"
   },
   "scripts": {
-    "build": "bun run check && tsc --project tsconfig.build.json",
+    "build": "pnpm run check && tsc --project tsconfig.build.json",
     "check": "tsc --noEmit",
     "lint": "eslint ./",
     "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts' 'test/**/*.ts'",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage --coverage-reporter=lcov",
-    "validate": "bun run check && bun run lint && bun run format:check",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --coverage.reporter=lcov",
+    "validate": "pnpm run check && pnpm run lint && pnpm run format:check",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run"
   },
@@ -65,14 +66,15 @@
     "@semantic-release/npm": "^13.2.0",
     "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/node": "^26.6.2",
-    "bun-types": "^1.4.2",
+    "@vitest/coverage-v8": "^5.0.0",
     "eslint": "^10.11.0",
     "globals": "^17.12.0",
     "jiti": "^2.7.0",
     "prettier": "^3.9.9",
     "semantic-release": "^25.0.9",
     "typescript": "6",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.0"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1"
