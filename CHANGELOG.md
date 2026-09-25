@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/shaftoe/pi-token-usage/compare/v0.3.0...v0.4.0) (2026-09-25)
+
+
+### Features
+
+* replace Bun with PNPM ([c9d6589](https://github.com/shaftoe/pi-token-usage/commit/c9d658908a072fa13eccf73449f7883bb102d3e7))
+
 # [0.3.0](https://github.com/shaftoe/pi-token-usage/compare/v0.2.1...v0.3.0) (2026-05-22)
 
 
