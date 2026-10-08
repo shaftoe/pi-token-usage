@@ -37,7 +37,7 @@
   ],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "^0.87.1",
-    "@earendil-works/pi-tui": "^0.87.1",
+    "@earendil-works/pi-tui": "^0.99.2",
     "@sinclair/typebox": "*"
   },
   "repository": {
