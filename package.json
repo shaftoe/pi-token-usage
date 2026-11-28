@@ -36,8 +36,8 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "^1.5.2",
-    "@earendil-works/pi-tui": "^1.5.2",
+    "@earendil-works/pi-coding-agent": "^1.7.0",
+    "@earendil-works/pi-tui": "^1.7.0",
     "@sinclair/typebox": "*"
   },
   "repository": {
@@ -58,7 +58,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "devDependencies": {
-    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.6.2",
+    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.6.3",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/commit-analyzer": "^13.0.1",
@@ -67,16 +67,16 @@
     "@semantic-release/github": "^12.0.11",
     "@semantic-release/npm": "^13.2.0",
     "@semantic-release/release-notes-generator": "^14.1.1",
-    "@types/node": "^26.6.6",
-    "@vitest/coverage-v8": "^5.1.0",
+    "@types/node": "^26.6.11",
+    "@vitest/coverage-v8": "^5.1.2",
     "eslint": "^10.15.0",
     "globals": "^17.14.0",
     "jiti": "^2.7.0",
     "prettier": "^3.10.1",
     "semantic-release": "^25.0.9",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.72.2",
-    "vitest": "^5.1.0"
+    "typescript-eslint": "^8.74.0",
+    "vitest": "^5.1.2"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1"

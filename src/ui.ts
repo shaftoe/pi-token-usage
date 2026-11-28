@@ -18,7 +18,7 @@ export function styleLine(line: string, theme: Theme): string {
 // ──────────────────────────────────────────────────────────────────────────────
 
 export interface TuiComponent {
-  render: (width: number) => string[];
+  render: (width: number) => readonly string[];
   invalidate: () => void;
   handleInput: () => void;
 }
